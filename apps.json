@@ -1,0 +1,5 @@
+{
+	"myapp_ios": {"key": "apns.pem", "type": "apns"},
+	"myapp_ios/sandbox": {"key": "apns-dev.pem", "type": "apns_sandbox"},
+	"myapp_android": {"key": "GCM_API_KEY", "type": "gcm"}
+}
