@@ -1,0 +1,19 @@
+{
+	"ImportPath": "github.com/iolate/GoPush",
+	"GoVersion": "go1.6",
+	"GodepVersion": "v63",
+	"Deps": [
+		{
+			"ImportPath": "github.com/alexjlockwood/gcm",
+			"Rev": "2407bc782264326a3d4c71dd1ebeb8ab75221923"
+		},
+		{
+			"ImportPath": "golang.org/x/net/http2",
+			"Rev": "7e42c0e1329bb108f7376a7618a2871ab90f1c4d"
+		},
+		{
+			"ImportPath": "golang.org/x/net/http2/hpack",
+			"Rev": "7e42c0e1329bb108f7376a7618a2871ab90f1c4d"
+		}
+	]
+}

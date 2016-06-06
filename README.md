@@ -1,7 +1,12 @@
 GoPush
 ====
 
-Simple asynchronous APNS / GCM service
+Simple asynchronous APNS / GCM service written in Go
+
+License
+--------
+
+The MIT License
 
 Example
 --------
