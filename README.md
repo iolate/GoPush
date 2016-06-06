@@ -14,7 +14,7 @@ Download
 
 Usage
 --------
-    GoPush [OPTIONS]
+    $ GoPush [OPTIONS]
 
 ##### Run Options
 
@@ -46,7 +46,7 @@ Example
 
 #### Start the service
 
-    GoPush --conf /path/to/config/apps.json
+    $ GoPush --conf /path/to/config/apps.json
 
 
 #### Send messages (Python)
