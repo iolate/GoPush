@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
+	"os"
 	"sync"
 	"flag"
-	"time"
 	"path"
+	"log"
 	"io"
 	"io/ioutil"
 	"bytes"
@@ -31,6 +31,7 @@ type AppSettings struct {
 	Port		string
 	ConfPath	string
 	BaseDir		string
+	LogFile		string
 }
 type App struct {
 	Id			string
@@ -64,48 +65,55 @@ var mutexApns sync.Mutex
 var gcmFeedbacks map[string][]GCMFeedback = make(map[string][]GCMFeedback)
 var mutexGcm sync.Mutex
 
-func PrintLog(msg... interface{}) {
-	fmt.Print("[", time.Now().Format(time.RFC3339), "] ")
-	fmt.Println(msg...)
-}
 var pushApps map[string]App
 var appSettings AppSettings
 func main() {
-	PrintLog("[Info/main] GoPush Start!!")
+	log.Println("[Info/main] GoPush Start!!")
 	
 	flag.StringVar(&appSettings.Host, "host", "127.0.0.1", "Listening IP (default: 127.0.0.1)")
 	flag.StringVar(&appSettings.Port, "port", "5481", "Listening Port (default: 5481)")
-	flag.StringVar(&appSettings.ConfPath, "conf", "", "Configure JSON File Path (required)")
+	flag.StringVar(&appSettings.ConfPath, "conf", "", "Configuration JSON File Path (required)")
+	flag.StringVar(&appSettings.LogFile, "logfile", "", "Path to log file (default: stdout)")
 	flag.Parse()
 	
+	if appSettings.LogFile != "" {
+		f, err := os.OpenFile(appSettings.LogFile, os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
+		if err != nil {
+			log.Fatal("[Error/main] Cannot open log file - ", err)
+		}else {
+			defer f.Close()
+			log.SetOutput(f)
+		}
+	}
+	
 	if appSettings.ConfPath == "" {
-		PrintLog("[Error/main] No Configure File!")
+		log.Fatal("[Error/main] No Configure File!")
 		return
 	}
-	PrintLog("[Info/main] Load config ", appSettings.ConfPath)
+	log.Println("[Info/main] Load config ", appSettings.ConfPath)
 	
-	file, e := ioutil.ReadFile(appSettings.ConfPath)
-	if e != nil {
-		PrintLog("[Error/main] Read file - ", e)
+	file, err := ioutil.ReadFile(appSettings.ConfPath)
+	if err != nil {
+		log.Fatal("[Error/main] Read file - ", err)
 		return
 	}
 	appSettings.BaseDir = path.Dir(appSettings.ConfPath)
 	
-	err := json.Unmarshal(file, &pushApps)
+	err = json.Unmarshal(file, &pushApps)
 	if err != nil {
-		PrintLog("[Info/Error/main] Configure unmarshal - ", e)
+		log.Fatal("[Error/main] Configure unmarshal - ", err)
 		return
 	}
 	for key, val := range pushApps { val.Id = key}
 	
-	PrintLog("[Info/main] Listening Host: ", appSettings.Host)
-	PrintLog("[Info/main] Listening Port: ", appSettings.Port)
+	log.Println("[Info/main] Listening Host: ", appSettings.Host)
+	log.Println("[Info/main] Listening Port: ", appSettings.Port)
 	
 	http.HandleFunc("/send", send)
 	http.HandleFunc("/feedback", feedback)
 	err = http.ListenAndServe(appSettings.Host+":"+appSettings.Port, nil)
 	if err != nil {
-		PrintLog("[Error/main] Listen - ", e)
+		log.Fatal("[Error/main] Listen - ", err)
 		return
 	}
 }
@@ -135,19 +143,19 @@ func send(w http.ResponseWriter, r *http.Request) {
 						headers = new(APNSHeaders)
 						err := json.Unmarshal([]byte(headersStr), headers)
 						if err != nil {
-							PrintLog("[Error/send] headers: ", err)
+							log.Fatal("[Error/send] headers: ", err)
 							headers = nil
 						}
 					}
 					
 					err := SendAPNS(&app, token, payload, headers)
 					if err != nil {
-						PrintLog("[Error/send] SendAPNS: ", err)
+						log.Fatal("[Error/send] SendAPNS: ", err)
 					}
 				case AppTypeGCM:
 					err := SendGCM(&app, token, payload)
 					if err != nil {
-						PrintLog("[Error/send] SendGCM: ", err)
+						log.Fatal("[Error/send] SendGCM: ", err)
 					}
 				}
 			}()
