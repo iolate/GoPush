@@ -70,7 +70,7 @@ Daemonize
 
 ##### Copy daemon script
     $ sudo cp $GOPATH/bin/GoPush /usr/bin/GoPush
-    $ sudo cp $GOPATH/src/github.com/iolate/GoPush/ /etc/init.d/gopushd
+    $ sudo cp $GOPATH/src/github.com/iolate/GoPush/gopushd /etc/init.d/gopushd
     $ sudo chmod +x /etc/init.d/gopushd
 
 ##### Create config directory and json
