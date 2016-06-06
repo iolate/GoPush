@@ -23,7 +23,7 @@ Run Options
 Example
 --------
 
-### Configuration Directory Tree
+#### Configuration Directory Tree
 
     /path/to/config
     ├── apns.pem
@@ -31,7 +31,7 @@ Example
     └── apps.json
 
 
-### Configuration JSON file (apps.json)
+#### Configuration JSON file (apps.json)
 
     {
         "myapp_ios": {"key": "apns.pem", "type": "apns"},
@@ -40,12 +40,12 @@ Example
     }
 
 
-### Start the service
+#### Start the service
 
     GoPush --conf /path/to/config/apps.json
 
 
-### Send messages (Python)
+#### Send messages (Python)
 
     import requests, json
     
@@ -62,14 +62,14 @@ Example
 
 Daemonize
 --------
-### Ubuntu 14.04
+#### Ubuntu 14.04
 
-#### Copy daemon script
+##### Copy daemon script
     $ sudo cp $GOPATH/bin/GoPush /usr/bin/GoPush
     $ sudo cp $GOPATH/src/github.com/iolate/GoPush/ /etc/init.d/gopushd
     $ sudo chmod +x /etc/init.d/gopushd
 
-#### Create config directory and json
+##### Create config directory and json
 
     $ sudo mkdir /etc/gopush
     $ sudo vi /etc/gopush/apps.json
@@ -82,7 +82,7 @@ or modify default path...
         DAEMON_ARGS="--conf /etc/gopush/apps.json" # <- Modify here!
         ...
 
-#### Start daemon
+##### Start daemon
 
     $ sudo update-rc.d gopushd defaults
     $ sudo service gopushd start
