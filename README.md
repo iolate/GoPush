@@ -8,11 +8,15 @@ License
 
 The MIT License
 
+Download
+--------
+    $ go get github.com/iolate/GoPush
+
 Usage
 --------
     GoPush [OPTIONS]
 
-Run Options
+##### Run Options
 
     --conf: Configuration JSON file path (required)
     --host: Listening IP (optional, default: 127.0.0.1)
