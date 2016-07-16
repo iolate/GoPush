@@ -104,7 +104,11 @@ func main() {
 		log.Fatal("[Error/main] Configure unmarshal - ", err)
 		return
 	}
-	for key, val := range pushApps { val.Id = key}
+	for key, val := range pushApps {
+		val.Id = key
+		
+		log.Println("[Info/main] Load App: ", key, " (", val.Type, ")")
+	}
 	
 	log.Println("[Info/main] Listening Host: ", appSettings.Host)
 	log.Println("[Info/main] Listening Port: ", appSettings.Port)
