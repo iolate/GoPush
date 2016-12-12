@@ -23,7 +23,7 @@ const (
 	AppTypeSandboxAPNS		= "apns_sandbox"
 	AppTypeGCM				= "gcm"
 	
-	APNSServer					= "https://api.push.push.apple.com"
+	APNSServer					= "https://api.push.apple.com"
 	DevelopmentAPNSServer		= "https://api.development.push.apple.com"
 )
 type AppSettings struct {
