@@ -16,6 +16,10 @@ import (
 	"encoding/json"
 	"golang.org/x/net/http2"
 	"github.com/alexjlockwood/gcm"
+	"time"
+	"crypto/x509"
+	"encoding/pem"
+	"github.com/dgrijalva/jwt-go"
 )
 
 const (
@@ -37,6 +41,9 @@ type App struct {
 	Id			string
 	Type		string	`json:"type"`
 	Key			string	`json:"key"`
+	BundleId	string	`json:"bundle_id"`		// for APNs
+	TeamId		string	`json:"team_id"`		// for APNs
+	KeyId		string	`json:"key_id"`			// for APNs
 }
 type APNSHeaders struct {
 	Id			string	`json:"apns-id"`
@@ -227,17 +234,46 @@ func SendAPNS(app *App, token, payload string, headers *APNSHeaders) error {
 		keyPath = appSettings.BaseDir + "/" + app.Key
 	}
 	
-	cert, err := tls.LoadX509KeyPair(keyPath, keyPath)
-	if err != nil { return err }
-	tlsConfig := &tls.Config{
-		Certificates: []tls.Certificate{cert},
-		InsecureSkipVerify: true,
-	}
-	tr := &http2.Transport{TLSClientConfig: tlsConfig}
-	client := &http.Client{Transport: tr}
-	
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(payload)))
 	if err != nil { return err }
+	
+	var transport *http2.Transport
+	if app.KeyId != "" {
+		secret_byte, err := ioutil.ReadFile(keyPath)
+		if err != nil { return err }
+		block, _ := pem.Decode(secret_byte)
+		
+		secret, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+		if err != nil { return err }
+		
+		claims := &jwt.StandardClaims{
+			Issuer: app.TeamId,
+			IssuedAt: time.Now().Unix(),
+		}
+		auth := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
+		auth.Header["alg"] = "ES256"
+		auth.Header["kid"] = app.KeyId
+		authString, err := auth.SignedString(secret)
+		if err != nil { return err }
+		
+		req.Header.Set("authorization", "bearer " + authString)
+		req.Header.Set("apns-topic", app.BundleId)
+		
+		tlsConfig := &tls.Config{
+			//InsecureSkipVerify: true,
+		}
+		transport = &http2.Transport{TLSClientConfig: tlsConfig}
+	}else{
+		cert, err := tls.LoadX509KeyPair(keyPath, keyPath)
+		if err != nil { return err }
+		
+		tlsConfig := &tls.Config{
+			Certificates: []tls.Certificate{cert},
+			InsecureSkipVerify: true,
+		}
+		transport = &http2.Transport{TLSClientConfig: tlsConfig}
+	}
+	
 	if headers != nil {
 		if headers.Id != "" { req.Header.Set("apns-id", headers.Id) }
 		if headers.Expiration != "" { req.Header.Set("apns-expiration", headers.Expiration) }
@@ -245,9 +281,9 @@ func SendAPNS(app *App, token, payload string, headers *APNSHeaders) error {
 		if headers.Topic != "" { req.Header.Set("apns-topic", headers.Topic) }
 	}
 	
+	client := &http.Client{Transport: transport}
 	resp, err := client.Do(req)
 	if err != nil { return err }
-	
 	if resp != nil {
 		defer resp.Body.Close()
 		
