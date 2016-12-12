@@ -56,12 +56,12 @@ Example
     # iOS APNS
     payload = {'aps': {'alert': 'Push Test', 'sound': 'default'}}
     data = {'app': 'myapp_ios', 'token': '<DEVICE_TOKEN>', 'payload': json.dumps(payload)}
-    requests.get('http://127.0.0.1:5481/send', data=data)
+    requests.post('http://127.0.0.1:5481/send', data=data)
     
     # Android GCM
     payload = {'title': 'GoPush', 'message': 'Push Test'}
     data = {'app': 'myapp_android', 'token': '<DEVICE_TOKEN>', 'payload': json.dumps(payload)}
-    requests.get('http://127.0.0.1:5481/send', data=data)
+    requests.post('http://127.0.0.1:5481/send', data=data)
 
 
 Daemonize
